@@ -6,16 +6,27 @@ class Block{
         this.data = data;
         this.previousHash = previousHash;
         this.hash = this.calculateHash();
+        this.nonce = 0;
     }
 
     calculateHash(){
-        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
+    }
+
+    mineBlock(difficulty){
+        while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+            this.nonce++;
+            this.hash = this.calculateHash();
+        }
+
+        console.log("Block Mined : " + this.hash);
     }
 }
 
 class BlockChain{
     constructor(){
         this.chain = [this.createGenesisBlock()];
+        this.difficulty = 4;
     }
 
     createGenesisBlock(){
@@ -28,7 +39,8 @@ class BlockChain{
 
     addBlock(newBlock){
         newBlock.previousHash = this.getLatestBlock().hash;
-        newBlock.hash = newBlock.calculateHash();
+        newBlock.mineBlock(this.difficulty);
+        //newBlock.hash = newBlock.calculateHash();
         this.chain.push(newBlock);
     }
 
@@ -70,3 +82,8 @@ jiffyCoin.chain[1].data = {amount : 50};
 jiffyCoin.chain[1].hash = jiffyCoin.chain[1].calculateHash();
 
 console.log('Is Blockchain Valid?', jiffyCoin.isChainValid());
+
+console.log('Mining Block 1.....');
+jiffyCoin.addBlock(new Block(1, "13/07/2022", {amount : 60}));
+console.log('Mining Block 2.....');
+jiffyCoin.addBlock(new Block(1, "10/07/2022", {amount : 75}));
